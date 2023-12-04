@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python main.py"

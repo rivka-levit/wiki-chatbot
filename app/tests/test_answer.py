@@ -17,7 +17,8 @@ class AnswerTests(TestCase):
                      '"batteries included" language due to its comprehensive '
                      'standard library.')
 
-        self.extractor = AnswerExtractor(self.text)
+        self.extractor = AnswerExtractor()
+        self.extractor.context = self.text
 
     def test_get_lemmas(self):
         """Test extracting lemmas of a sentence."""

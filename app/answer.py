@@ -7,8 +7,6 @@ import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from content import WikiContentPage
-
 
 class AnswerExtractor:
     """Extract the most similar sentence as an answer of chatbot."""
@@ -18,16 +16,20 @@ class AnswerExtractor:
     _context = None
     _tokens = None
 
-    def __init__(self, context: str):
+    def __init__(self, context: str = None):
         self.context = context
 
     @property
     def context(self):
+        if self._context is None:
+            raise AttributeError(
+                "Context hasn't been set yet. Assign value to the context."
+            )
         return self._context
 
     @context.setter
     def context(self, value):
-        if not isinstance(value, str):
+        if not isinstance(value, str) and value is not None:
             raise ValueError(f'Context must be a string, not a {type(value)} '
                              f'type.')
         self._context = value
@@ -49,6 +51,8 @@ class AnswerExtractor:
         return lemmas
 
     def get_answer(self, q: str) -> str | None:
+        """Return the most similar sentence from the context."""
+
         if self._tokens is None:
             self._tokens = nltk.sent_tokenize(self.context)
 
@@ -65,3 +69,5 @@ class AnswerExtractor:
 
         if coeff > 0.3:
             return sentence_tokens[index]
+
+        return None

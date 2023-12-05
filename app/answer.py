@@ -15,12 +15,29 @@ class AnswerExtractor:
 
     ltz = nltk.stem.WordNetLemmatizer()
     pos_tags = ('n', 'v', 'a', 'r', 's')
+    _context = None
+    _tokens = None
+
+    def __init__(self, context: str):
+        self.context = context
+
+    @property
+    def context(self):
+        return self._context
+
+    @context.setter
+    def context(self, value):
+        if not isinstance(value, str):
+            raise ValueError(f'Context must be a string, not a {type(value)} '
+                             f'type.')
+        self._context = value
+        self._tokens = None
 
     def lemma_me(self, sent: str) -> list:
         """Return significant lemmas of a sentence."""
 
-        tokens = nltk.word_tokenize(sent)
-        tagged_tokens = nltk.pos_tag(tokens)
+        sent_tokens = nltk.word_tokenize(sent)
+        tagged_tokens = nltk.pos_tag(sent_tokens)
         lemmas = list()
 
         for token, tag in tagged_tokens:
@@ -32,5 +49,19 @@ class AnswerExtractor:
         return lemmas
 
     def get_answer(self, q: str) -> str | None:
-        pass
+        if self._tokens is None:
+            self._tokens = nltk.sent_tokenize(self.context)
 
+        sentence_tokens = self._tokens + [q]
+
+        tv = TfidfVectorizer(tokenizer=self.lemma_me)
+        tf = tv.fit_transform(sentence_tokens)
+
+        values = cosine_similarity(tf[-1], tf)
+        index = values.argsort()[0][-2]
+
+        values_flat = sorted(values.flatten())
+        coeff = values_flat[-2]
+
+        if coeff > 0.3:
+            return sentence_tokens[index]

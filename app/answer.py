@@ -58,7 +58,7 @@ class AnswerExtractor:
 
         sentence_tokens = self._tokens + [q]
 
-        tv = TfidfVectorizer(tokenizer=self.lemma_me)
+        tv = TfidfVectorizer(tokenizer=self.lemma_me, token_pattern=None)
         tf = tv.fit_transform(sentence_tokens)
 
         values = cosine_similarity(tf[-1], tf)
